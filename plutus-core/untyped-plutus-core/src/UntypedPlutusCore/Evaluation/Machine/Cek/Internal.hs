@@ -160,7 +160,7 @@ which is a problem.)
 
 -- 'Values' for the modified CEK machine.
 data CekValue uni fun =
-    VCon !ExMemory !(Some (ValueOf uni))
+    VCon ExMemory !(Some (ValueOf uni))
   | VDelay (TermWithMem uni fun) (CekValEnv uni fun)
   | VLamAbs Name (TermWithMem uni fun) (CekValEnv uni fun)
   | VBuiltin            -- A partial builtin application, accumulating arguments for eventual full application.
