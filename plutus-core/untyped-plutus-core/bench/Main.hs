@@ -13,54 +13,54 @@ main :: IO ()
 main = defaultMain
     -- NOTE: there is a faster/better way to create a map using fromAscList
     -- but we want to bench cons-ing because that is what we are using in our machine.
-    [ bgroup "create/1000" [ bench "bral" $ whnf (extendB B.nil) 1000
-                           , bench "imap" $ whnf (extendI I.empty) 1000
+    [ bgroup "create/100" [ bench "bral" $ whnf (extendB B.nil) 100
+                           , bench "imap" $ whnf (extendI I.empty) 100
                            ]
-    , bgroup "create/10000" [ bench "bral" $ whnf (extendB B.nil) 10000
-                           , bench "imap" $ whnf (extendI I.empty) 10000
+    , bgroup "create/250" [ bench "bral" $ whnf (extendB B.nil) 250
+                           , bench "imap" $ whnf (extendI I.empty) 250
                             ]
 
 
-    , bgroup "query/front/1000" [ bench "bral" $ whnf (queryFrontB 1000) b1000
-                                , bench "imap" $ whnf (queryFrontI 1000) i1000
+    , bgroup "query/front/100" [ bench "bral" $ whnf (queryFrontB 100) b100
+                                , bench "imap" $ whnf (queryFrontI 100) i100
                                 ]
-    , bgroup "query/front/10000" [ bench "bral" $ whnf (queryFrontB 10000) b10000
-                                , bench "imap" $ whnf (queryFrontI 10000) i10000
+    , bgroup "query/front/250" [ bench "bral" $ whnf (queryFrontB 250) b250
+                                , bench "imap" $ whnf (queryFrontI 250) i250
                                 ]
 
-    , bgroup "query/back/1000" [ bench "bral" $ whnf (queryBackB 1000) b1000
-                               , bench "imap" $ whnf (queryBackI 1000) i1000
+    , bgroup "query/back/100" [ bench "bral" $ whnf (queryBackB 100) b100
+                               , bench "imap" $ whnf (queryBackI 100) i100
                                ]
-    , bgroup "query/back/10000" [ bench "bral" $ whnf (queryBackB 10000) b10000
-                               , bench "imap" $ whnf (queryBackI 10000) i10000
-                               ]
-
-
-    , bgroup "query/rand/1000" [ bench "bral" $ whnf (uncurry queryRandB) (rand1000, b1000)
-                               , bench "imap" $ whnf (uncurry queryRandI) (rand1000, i1000)
-                               ]
-    , bgroup "query/rand/10000" [ bench "bral" $ whnf (uncurry queryRandB) (rand10000, b10000)
-                               , bench "imap" $ whnf (uncurry queryRandI) (rand10000, i10000)
+    , bgroup "query/back/250" [ bench "bral" $ whnf (queryBackB 250) b250
+                               , bench "imap" $ whnf (queryBackI 250) i250
                                ]
 
-    , bgroup "create1000/front1000/cons1000/back1000/cons1000/rand1000"
-            [ bench "bral" $ whnf (uncurry $ mixB 1000 1000 1000 1000) (rand1000, b1000)
-            , bench "imap" $ whnf (uncurry $ mixI 1000 1000 1000 1000) (rand1000, i1000)
+
+    , bgroup "query/rand/100" [ bench "bral" $ whnf (uncurry queryRandB) (rand100, b100)
+                               , bench "imap" $ whnf (uncurry queryRandI) (rand100, i100)
+                               ]
+    , bgroup "query/rand/250" [ bench "bral" $ whnf (uncurry queryRandB) (rand250, b250)
+                               , bench "imap" $ whnf (uncurry queryRandI) (rand250, i250)
+                               ]
+
+    , bgroup "create100/front100/cons100/back100/cons100/rand100"
+            [ bench "bral" $ whnf (uncurry $ mixB 100 100 100 100) (rand100, b100)
+            , bench "imap" $ whnf (uncurry $ mixI 100 100 100 100) (rand100, i100)
             ]
-    , bgroup "create10000/front1000/cons1000/back1000/cons1000/rand10000"
-            [ bench "bral" $ whnf (uncurry $ mixB 1000 1000 1000 1000) (rand10000, b10000)
-            , bench "imap" $ whnf (uncurry $ mixI 1000 1000 1000 1000) (rand10000, i10000)
+    , bgroup "create250/front100/cons100/back100/cons100/rand250"
+            [ bench "bral" $ whnf (uncurry $ mixB 100 100 100 100) (rand250, b250)
+            , bench "imap" $ whnf (uncurry $ mixI 100 100 100 100) (rand250, i250)
             ]
 
 
     ]
   where
-        b1000 = extendB B.nil 1000
-        i1000 = extendI I.empty 1000
-        b10000 = extendB B.nil 10000
-        i10000 = extendI I.empty 10000
-        rand1000 = take 1000 $ randomRs (1,1000) g
-        rand10000 = take 10000 $ randomRs (1,10000) g
+        b100 = extendB B.nil 100
+        i100 = extendI I.empty 100
+        b250 = extendB B.nil 250
+        i250 = extendI I.empty 250
+        rand100 = take 100 $ randomRs (1,100) g
+        rand250 = take 250 $ randomRs (1,250) g
         g = mkStdGen 59950
 
 extendB :: BList () -> Word -> B.BList ()
