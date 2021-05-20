@@ -492,3 +492,5 @@ benchmark bral-bench
       criterion >= 1.5.9.0,
       random >= 1.2.0,
       containers -any,
+      -- ral-0.2 dependency conflict with cardano-binary
+      ral == 0.1,
