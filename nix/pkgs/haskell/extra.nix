@@ -85,7 +85,7 @@ let
     inherit compiler-nix-name index-state checkMaterialization;
     plan-sha256 = lib.removeSuffix "\n" (builtins.readFile hlsShaFile);
     modules = [{
-      packages.ghcide.patches = [ ../../patches/ghcide_partial_iface.patch ];
+      packages.ghcide.patches = [ ../../patches/ghcide_partial_iface.patch ../../patches/haskell-language-server-force-object-code.patch ];
       # Workaround for https://github.com/haskell/haskell-language-server/issues/1160
       packages.haskell-language-server.patches = lib.mkIf stdenv.isDarwin [ ../../patches/haskell-language-server-dynamic.patch ];
       # See https://github.com/haskell/haskell-language-server/pull/1382#issuecomment-780472005

@@ -1,0 +1,13 @@
+diff --git i/src/Development/IDE/Core/Rules.hs w/src/Development/IDE/Core/Rules.hs
+index 3d33b6c..ce86f9c 100644
+--- i/src/Development/IDE/Core/Rules.hs
++++ w/src/Development/IDE/Core/Rules.hs
+@@ -986,7 +986,7 @@ needsCompilationRule = defineEarlyCutoff $ RuleNoDiagnostics $ \NeedsCompilation
+         (modsums,needsComps) <- liftA2
+             (,) (map (fmap (msrModSummary . fst)) <$> usesWithStale GetModSummaryWithoutTimestamps revdeps)
+                 (uses NeedsCompilation revdeps)
+-        pure $ computeLinkableType ms modsums (map join needsComps)
++        pure $ Just ObjectLinkable
+
+   pure (Just $ LBS.toStrict $ B.encode $ hash res, Just res)
+   where
