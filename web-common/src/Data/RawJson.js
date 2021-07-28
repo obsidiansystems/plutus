@@ -2,9 +2,9 @@
 /*global exports gtag*/
 'use strict';
 
-exports._pretty = function (str) {
+exports._pretty = function (json) {
     return JSON.stringify(
-        JSON.parse(str),
+        json,
         null,
         2
     );

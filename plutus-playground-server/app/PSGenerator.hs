@@ -218,7 +218,7 @@ runSimulation sourceCode Simulation {simulationActions, simulationWallets} = do
                 { sourceCode
                 , wallets = simulationWallets
                 , program =
-                      toJSON . encodeToText $ toExpression <$> simulationActions
+                      toJSON $ toExpression <$> simulationActions
                 }
     expr <- PI.evaluationToExpr evaluation
     result <- mapError InterpreterError $ Webghc.compile maxInterpretationTime False (SourceCode expr)

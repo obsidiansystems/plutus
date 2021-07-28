@@ -46,7 +46,7 @@ import Editor.Types (Action(..), State) as Editor
 import Effect.Aff.Class (class MonadAff)
 import Effect.Class (class MonadEffect, liftEffect)
 import Effect.Exception (Error, error)
-import Foreign.Generic (decodeJSON, encodeJSON)
+import Foreign.Generic (decodeJSON, encode)
 import Gist (_GistId, gistId)
 import Gists.Types (GistAction(..))
 import Gists.Types as Gists
@@ -480,7 +480,7 @@ replaceViewOnSuccess result source target = do
 ------------------------------------------------------------
 toEvaluation :: SourceCode -> Simulation -> Maybe Evaluation
 toEvaluation sourceCode (Simulation { simulationActions, simulationWallets }) = do
-  program <- RawJson <<< encodeJSON <$> traverse toExpression simulationActions
+  program <- RawJson <<< encode <$> traverse toExpression simulationActions
   pure
     $ Evaluation
         { wallets: simulationWallets
@@ -492,7 +492,7 @@ toExpression :: ContractCall FormArgument -> Maybe Expression
 toExpression = traverseContractCall encodeForm
   where
   encodeForm :: FormArgument -> Maybe RawJson
-  encodeForm argument = (RawJson <<< encodeJSON) <$> formArgumentToJson argument
+  encodeForm argument = (RawJson <<< encode) <$> formArgumentToJson argument
 
 traverseContractCall ::
   forall m b a.

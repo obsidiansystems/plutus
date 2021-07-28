@@ -31,7 +31,6 @@ import           Data.Maybe                            (isJust)
 import           Data.Text                             (Text)
 
 import           Data.Default                          (Default (def))
-import qualified Data.Text.Encoding                    as Text
 import           Data.Text.Prettyprint.Doc             (defaultLayoutOptions, layoutPretty, pretty, vsep)
 import           Data.Text.Prettyprint.Doc.Render.Text (renderStrict)
 import           Ledger.Crypto                         (pubKeyHash)
@@ -119,9 +118,7 @@ stage ::
     -> BSL.ByteString
     -> Either PlaygroundError EvaluationResult
 stage contract programJson simulatorWalletsJson = do
-    simulationJson :: String <- playgroundDecode "String" programJson
-    simulation :: [Expression] <-
-        playgroundDecode "[Expression schema]" . BSL.pack $ simulationJson
+    simulation :: [Expression] <- playgroundDecode "[Expression schema]" programJson
     simulatorWallets :: [SimulatorWallet] <-
         playgroundDecode "[SimulatorWallet]" simulatorWalletsJson
     let config = Plutus.Trace.Playground.EmulatorConfig (Left $ toInitialDistribution simulatorWallets)
@@ -143,22 +140,13 @@ expressionToTrace = \case
     AddBlocks blcks -> void $ Trace.waitNSlots $ fromIntegral blcks
     AddBlocksUntil slot -> void $ Trace.waitUntilSlot slot
     PayToWallet {sender, recipient, amount} -> void $ Trace.payToWallet sender recipient amount
-    CallEndpoint {caller, argumentValues=FunctionSchema { endpointDescription, argument = rawArgument}} ->
-        let fromString (JSON.String string) = Just $ BSL.fromStrict $ Text.encodeUtf8 string
-            fromString _                    = Nothing
-        in case fromString rawArgument of
-            Just string ->
-                case JSON.eitherDecode string of
-                    Left errs ->
-                        throwError
-                            $ EmulatorJSONDecodingError
-                              ("Error extracting JSON from arguments. Expected an array of JSON strings. " <>
-                        show errs)
-                              rawArgument
-                    Right argument -> do
-                        Trace.callEndpoint caller (getEndpointDescription endpointDescription) argument
-            Nothing ->
+    CallEndpoint {caller, argumentValues=FunctionSchema { endpointDescription, argument = rawArgument }} ->
+        case JSON.fromJSON rawArgument of
+            JSON.Error errs ->
                 throwError
                     $ EmulatorJSONDecodingError
-                      ("Expected a String, but got: " <> show rawArgument)
+                      ("Error extracting JSON from arguments. Expected an array of JSON strings. " <>
+                show errs)
                       rawArgument
+            JSON.Success argument -> do
+                Trace.callEndpoint caller (getEndpointDescription endpointDescription) argument
