@@ -53,6 +53,8 @@ import           Prelude                (Semigroup (..))
 import qualified Prelude                as Haskell
 import           Schema                 (ToSchema)
 
+import qualified Wallet.Emulator.Wallet as Wallet
+
 {- HLINT ignore "Use uncurry" -}
 
 -- | A currency that can be created exactly once
@@ -184,6 +186,12 @@ mintCurrency
     :: Promise (Maybe (Last OneShotCurrency)) CurrencySchema CurrencyError OneShotCurrency
 mintCurrency = endpoint @"Create native token" $ \SimpleMPS{tokenName, amount} -> do
     ownPK <- pubKeyHash <$> ownPubKey
+    utxos <- utxosAt (pubKeyHashAddress ownPK)
+    logInfo @Haskell.String $ "OWN | MINTCURRENCY: " <> Haskell.show utxos
+
+    let pk1 = pubKeyHash $ Wallet.walletPubKey $ Wallet.knownWallet 1
+    utxospk1 <- utxosAt (pubKeyHashAddress pk1)
+    logInfo @Haskell.String $ "PK1 | MINTCURRENCY: " <> Haskell.show utxospk1
     cur <- mintContract ownPK [(tokenName, amount)]
     tell (Just (Last cur))
     pure cur

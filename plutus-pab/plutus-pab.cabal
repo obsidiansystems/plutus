@@ -138,6 +138,7 @@ library
         base >=4.7 && <5,
         bytestring -any,
         cardano-api -any,
+        cardano-binary -any,
         cardano-crypto -any,
         cardano-ledger-byron -any,
         cardano-prelude -any,
