@@ -78,7 +78,10 @@ toPublicKey = xPubToPublicKey . Crypto.toXPub
 -- http://ed25519.cr.yp.to/software.html.
 
 privateKey1, privateKey2, privateKey3, privateKey4, privateKey5, privateKey6, privateKey7, privateKey8, privateKey9, privateKey10 :: Crypto.XPrv
-privateKey1 = generateFromSeed "9d61b19deffd5a60ba844af492ec2cc44449c5697b326919703bac031cae7f60d75a980182b10ab7d54bfed3c964073a0ee172f3daa62325af021a68f707511a"
+privateKey1 =
+    -- generateFromSeed "9d61b19deffd5a60ba844af492ec2cc44449c5697b326919703bac031cae7f60d75a980182b10ab7d54bfed3c964073a0ee172f3daa62325af021a68f707511a"
+    let Right x = Crypto.xprv ("230eb2a7790d0a3558884bfc9cd4f81cebc73c9f03518f3c083947dfd2e48a50827b52e285443b84b2c7f9baac0177c43b7e0069d4808c6e158c906371c82acb" :: BS.ByteString)
+    in x
 privateKey2 = generateFromSeed "4ccd089b28ff96da9db6c346ec114e0f5b8a319f35aba624da8cf6ed4fb8a6fb3d4017c3e843895a92b70aa74d1b7ebc9c982ccf2ec4968cc0cd55f12af4660c"
 privateKey3 = generateFromSeed "c5aa8df43f9f837bedb7442f31dcb7b166d38535076f094b85ce3a2e0b4458f7fc51cd8e6218a1a38da47ed00230f0580816ed13ba3303ac5deb911548908025"
 privateKey4 = generateFromSeed "0d4a05b07352a5436e180356da0ae6efa0345ff7fb1572575772e8005ed978e9e61a185bcef2613a6c7cb79763ce945d3b245d76114dd440bcf5f2dc1aa57057"
