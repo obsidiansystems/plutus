@@ -30,8 +30,8 @@ import qualified Cardano.Ledger.Alonzo.TxWitness    as Alonzo
 import qualified Cardano.Ledger.ShelleyMA.TxBody    as Allegra
 
 import qualified Cardano.Ledger.Keys                as Shelley
-import qualified Shelley.Spec.Ledger.Tx             as Shelley
-import qualified Shelley.Spec.Ledger.TxBody         as Shelley
+import qualified Cardano.Ledger.Shelley.Tx             as Shelley
+import qualified Cardano.Ledger.Shelley.TxBody         as Shelley
 
 makeTransactionBody' :: TxBodyContent BuildTx AlonzoEra -> Either TxBodyError (TxBody AlonzoEra)
 makeTransactionBody'
@@ -41,7 +41,6 @@ makeTransactionBody'
         txOuts,
         txFee,
         txValidityRange = (lowerBound, upperBound),
-        txExtraScriptData,
         txExtraKeyWits,
         txWithdrawals,
         txCertificates,
@@ -111,7 +110,7 @@ makeTransactionBody'
 
     scriptdata :: [ScriptData]
     scriptdata =
-        [ d | BuildTxWith (TxExtraScriptData _ ds) <- [txExtraScriptData], d <- ds ]
+        [ d | TxOut _ _ (TxOutDatum _ d) <- txOuts ]
      ++ [ d | (_, AnyScriptWitness
                     (PlutusScriptWitness
                        _ _ _ (ScriptDatumForTxIn d) _ _)) <- witnesses
@@ -136,7 +135,7 @@ toShelleyWithdrawal withdrawals =
 toShelleyTxOut :: forall era ledgerera.
                  (ShelleyLedgerEra era ~ ledgerera,
                   IsShelleyBasedEra era, Ledger.ShelleyBased ledgerera)
-               => TxOut era -> Ledger.TxOut ledgerera
+               => TxOut CtxTx era -> Ledger.TxOut ledgerera
 toShelleyTxOut (TxOut _ (TxOutAdaOnly AdaOnlyInByronEra _) _) =
     case shelleyBasedEra :: ShelleyBasedEra era of {}
 
@@ -153,7 +152,8 @@ toShelleyTxOut (TxOut addr (TxOutValue MultiAssetInAlonzoEra value) txoutdata) =
     Alonzo.TxOut (toShelleyAddr addr) (toMaryValue value)
                  (toAlonzoTxOutDataHash txoutdata)
 
-toAlonzoTxOutDataHash :: TxOutDatumHash era
+toAlonzoTxOutDataHash :: TxOutDatum CtxTx era
                       -> StrictMaybe (Alonzo.DataHash StandardCrypto)
-toAlonzoTxOutDataHash TxOutDatumHashNone                     = SNothing
+toAlonzoTxOutDataHash TxOutDatumNone                     = SNothing
 toAlonzoTxOutDataHash (TxOutDatumHash _ (ScriptDataHash dh)) = SJust dh
+toAlonzoTxOutDataHash (TxOutDatum _ d) = let ScriptDataHash dh = hashScriptData d in  SJust dh

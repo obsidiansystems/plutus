@@ -21,7 +21,6 @@ module Plutus.Contract.CardanoAPI(
   , fromCardanoValue
   , fromCardanoFee
   , fromCardanoValidityRange
-  , fromCardanoExtraScriptData
   , fromCardanoScriptInEra
   , toCardanoTxBody
   , toCardanoTxIn
@@ -33,7 +32,6 @@ module Plutus.Contract.CardanoAPI(
   , toCardanoValue
   , toCardanoFee
   , toCardanoValidityRange
-  , toCardanoExtraScriptData
   , toCardanoScriptInEra
   , toCardanoPaymentKeyHash
   , toCardanoScriptHash
@@ -203,7 +201,6 @@ toCardanoTxBody protocolParams networkId P.Tx{..} = do
         , txOuts = txOuts
         , txFee = txFee'
         , txValidityRange = txValidityRange
-        , txExtraScriptData = C.BuildTxWith $ toCardanoExtraScriptData (Map.elems txData)
         , txMintValue = txMintValue
         , txProtocolParams = C.BuildTxWith protocolParams
         , txScriptValidity = C.TxScriptValidityNone
@@ -279,14 +276,14 @@ toCardanoMintWitness (P.MintingPolicy script) = C.PlutusScriptWitness C.PlutusSc
     <*> pure (C.ScriptDataNumber 0) -- TODO: redeemers not modelled yet in Plutus MP scripts, value is ignored
     <*> toCardanoExecutionUnits script [] -- TODO: is [] correct?
 
-fromCardanoTxOut :: C.TxOut era -> Either FromCardanoError P.TxOut
+fromCardanoTxOut :: C.TxOut C.CtxTx era -> Either FromCardanoError P.TxOut
 fromCardanoTxOut (C.TxOut addr value datumHash) =
     P.TxOut
     <$> fromCardanoAddress addr
     <*> pure (fromCardanoTxOutValue value)
     <*> pure (fromCardanoTxOutDatumHash datumHash)
 
-toCardanoTxOut :: C.NetworkId -> P.TxOut -> Either ToCardanoError (C.TxOut C.AlonzoEra)
+toCardanoTxOut :: C.NetworkId -> P.TxOut -> Either ToCardanoError (C.TxOut ctx C.AlonzoEra)
 toCardanoTxOut networkId (P.TxOut addr value datumHash) =
     C.TxOut <$> toCardanoAddress networkId addr
             <*> toCardanoTxOutValue value
@@ -367,12 +364,13 @@ fromCardanoTxOutValue (C.TxOutValue _ value)      = fromCardanoValue value
 toCardanoTxOutValue :: P.Value -> Either ToCardanoError (C.TxOutValue C.AlonzoEra)
 toCardanoTxOutValue value = C.TxOutValue C.MultiAssetInAlonzoEra <$> toCardanoValue value
 
-fromCardanoTxOutDatumHash :: C.TxOutDatumHash era -> Maybe P.DatumHash
-fromCardanoTxOutDatumHash C.TxOutDatumHashNone   = Nothing
+fromCardanoTxOutDatumHash :: C.TxOutDatum C.CtxTx era -> Maybe P.DatumHash
+fromCardanoTxOutDatumHash C.TxOutDatumNone   = Nothing
 fromCardanoTxOutDatumHash (C.TxOutDatumHash _ h) = Just $ P.DatumHash $ PlutusTx.toBuiltin (C.serialiseToRawBytes h)
+fromCardanoTxOutDatumHash (C.TxOutDatum _ d) = Just $ P.DatumHash $ PlutusTx.toBuiltin (C.serialiseToRawBytes (C.hashScriptData d))
 
-toCardanoTxOutDatumHash :: Maybe P.DatumHash -> Either ToCardanoError (C.TxOutDatumHash C.AlonzoEra)
-toCardanoTxOutDatumHash Nothing = pure C.TxOutDatumHashNone
+toCardanoTxOutDatumHash :: Maybe P.DatumHash -> Either ToCardanoError (C.TxOutDatum ctx C.AlonzoEra)
+toCardanoTxOutDatumHash Nothing = pure C.TxOutDatumNone
 toCardanoTxOutDatumHash (Just (P.DatumHash bs)) = C.TxOutDatumHash C.ScriptDataInAlonzoEra <$> tag "toCardanoTxOutDatumHash" (deserialiseFromRawBytes (C.AsHash C.AsScriptData) (PlutusTx.fromBuiltin bs))
 
 fromCardanoMintValue :: C.TxMintValue build era -> P.Value
@@ -459,13 +457,6 @@ fromCardanoSlotNo (C.SlotNo w64) = P.Slot (toInteger w64)
 
 toCardanoSlotNo :: P.Slot -> C.SlotNo
 toCardanoSlotNo (P.Slot i) = C.SlotNo (fromInteger i)
-
-fromCardanoExtraScriptData :: C.TxExtraScriptData era -> [P.Datum]
-fromCardanoExtraScriptData C.TxExtraScriptDataNone            = []
-fromCardanoExtraScriptData (C.TxExtraScriptData _ scriptData) = fmap (P.Datum . fromCardanoScriptData) scriptData
-
-toCardanoExtraScriptData :: [P.Datum] -> C.TxExtraScriptData C.AlonzoEra
-toCardanoExtraScriptData = C.TxExtraScriptData C.ScriptDataInAlonzoEra . fmap (toCardanoScriptData . P.getDatum)
 
 fromCardanoScriptData :: C.ScriptData -> Api.BuiltinData
 fromCardanoScriptData = Api.dataToBuiltinData . C.toPlutusData

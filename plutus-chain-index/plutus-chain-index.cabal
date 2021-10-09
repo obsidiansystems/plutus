@@ -64,6 +64,7 @@ library
     build-depends:
         cardano-ledger-core -any,
         cardano-ledger-alonzo -any,
+        cardano-ledger-shelley -any,
         cardano-ledger-shelley-ma -any,
         ouroboros-consensus-shelley -any,
         shelley-spec-ledger -any,
