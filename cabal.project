@@ -99,7 +99,7 @@ source-repository-package
 source-repository-package
   type: git
   location: https://github.com/input-output-hk/cardano-base
-  tag: 592aa61d657ad5935a33bace1243abce3728b643
+  tag: 64d7702866225f6d53afab4e2fe935f2f0d5848a
   subdir:
     base-deriving-via
     binary
@@ -141,7 +141,7 @@ source-repository-package
 source-repository-package
   type: git
   location: https://github.com/input-output-hk/ouroboros-network
-  tag: 5d37a927046bc7da2887830d8e35cf604622ce09
+  tag: e0ccbb73296027a5e5fd224a78374321974758ce
   subdir:
     monoidal-synchronisation
     typed-protocols
@@ -162,7 +162,7 @@ source-repository-package
   type: git
   location: https://github.com/input-output-hk/iohk-monitoring-framework
   -- Important Note: Read below, before changing this!
-  tag: 46f994e216a1f8b36fe4669b47b2a7011b0e153c
+  tag: 808724ff8a19a33d0ed06f9ef59fbd900b08553c
   -- Are you thinking of updating this tag to some other commit?  Please
   -- ensure that the commit you are about to use is the latest one from
   -- the *develop* branch of this repo:
@@ -185,7 +185,7 @@ source-repository-package
 source-repository-package
   type: git
   location: https://github.com/raduom/cardano-ledger-specs
-  tag: ef6bb99782d61316da55470620c7da994cc352b2
+  tag: c6c4be1562e23a3dd48282387c4e48ff918fbab0
   subdir:
     byron/chain/executable-spec
     byron/crypto
@@ -202,6 +202,7 @@ source-repository-package
     shelley-ma/impl
     cardano-ledger-core
     alonzo/impl
+    libs/non-integral
 
 -- A lot of plutus dependencies have to be synchronized with the dependencies of
 -- cardano-node. If you update cardano-node, please make sure that all dependencies
@@ -209,7 +210,7 @@ source-repository-package
 source-repository-package
   type: git
   location: https://github.com/input-output-hk/cardano-node.git
-  tag: ed7fdbf65f40f8e194850b87dd8c631fe26154e6
+  tag: 4f09184f281e23a2c6cd9222b0256772e5aaf02c
   subdir:
     cardano-api
     cardano-node
