@@ -29,11 +29,13 @@ library
         Plutus.Contracts.Auction
         Plutus.Contracts.SealedBidAuction
         Plutus.Contracts.TokenAccount
+        Plutus.Contracts.CompileCurrency
         Plutus.Contracts.Crowdfunding
         Plutus.Contracts.Currency
         Plutus.Contracts.ErrorHandling
         Plutus.Contracts.Escrow
         Plutus.Contracts.SimpleEscrow
+        Plutus.Contracts.FactoryScript
         Plutus.Contracts.Future
         Plutus.Contracts.GameStateMachine
         Plutus.Contracts.Governance
@@ -49,6 +51,7 @@ library
         Plutus.Contracts.PubKey
         Plutus.Contracts.Stablecoin
         Plutus.Contracts.Swap
+        Plutus.Contracts.UniPools
         Plutus.Contracts.Uniswap
         Plutus.Contracts.Uniswap.OnChain
         Plutus.Contracts.Uniswap.OffChain
@@ -71,6 +74,8 @@ library
         base -any,
         aeson -any,
         bytestring -any,
+        utf8-string -any,
+        cardano-api,
         containers -any,
         data-default -any,
         freer-extras -any,
@@ -86,6 +91,7 @@ library
         prettyprinter -any,
         hashable -any,
         freer-simple -any,
+        safe -any,
         streaming -any,
         semigroups -any,
         openapi3 -any
