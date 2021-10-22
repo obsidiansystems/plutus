@@ -24,13 +24,13 @@ calculateInitialLiquidity outA outB = Amount $ case isqrt (unAmount outA * unAmo
         | l > 0 -> l
     Approximately l
         | l > 0 -> l + 1
-    _           -> traceError "insufficient liquidity"
+    _           -> traceError $ "calculateInitialLiquidity: insufficient liquidity"
 
 {-# INLINABLE calculateAdditionalLiquidity #-}
 calculateAdditionalLiquidity :: Amount A -> Amount B -> Amount Liquidity -> Amount A -> Amount B -> Amount Liquidity
 calculateAdditionalLiquidity oldA' oldB' liquidity delA' delB' =
   case rsqrt ratio of
-    Imaginary       -> traceError "insufficient liquidity"
+    Imaginary       -> traceError "calculateAdditionalLiquidity: insufficient liquidity"
     Exactly x       -> Amount x - liquidity
     Approximately x -> Amount x - liquidity
   where

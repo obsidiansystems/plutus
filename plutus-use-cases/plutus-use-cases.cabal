@@ -49,6 +49,7 @@ library
         Plutus.Contracts.Prism.StateMachine
         Plutus.Contracts.Prism.Unlock
         Plutus.Contracts.PubKey
+        Plutus.Contracts.RawSwap
         Plutus.Contracts.Stablecoin
         Plutus.Contracts.Swap
         Plutus.Contracts.UniPools
@@ -74,17 +75,20 @@ library
         base -any,
         aeson -any,
         bytestring -any,
+        directory -any,
         utf8-string -any,
-        cardano-api,
+        cardano-api -any,
         containers -any,
         data-default -any,
         freer-extras -any,
         mtl -any,
         plutus-core -any,
         plutus-tx -any,
+        plutus-chain-index -any,
         plutus-contract -any,
         playground-common -any,
         plutus-ledger -any,
+        process -any,
         template-haskell -any,
         lens -any,
         text -any,

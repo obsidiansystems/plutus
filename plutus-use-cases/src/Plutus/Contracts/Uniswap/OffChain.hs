@@ -29,6 +29,7 @@ module Plutus.Contracts.Uniswap.OffChain
     , ownerEndpoint, userEndpoints
     , uniswapScript, uniswap, uniswapInstance
     , poolStateCoin, liquidityCurrency, liquidityPolicy
+    , findSwapA, findSwapB, findUniswapFactoryAndPool
     ) where
 
 import           Control.Lens                     (view)

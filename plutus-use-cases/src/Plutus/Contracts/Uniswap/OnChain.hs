@@ -103,15 +103,15 @@ validateCreate :: Uniswap
                -> Bool
 validateCreate Uniswap{..} c lps lp@LiquidityPool{..} ctx =
     traceIfFalse "Uniswap coin not present" (isUnity (valueWithin $ findOwnInput' ctx) usCoin)          && -- 1.
-    Constraints.checkOwnOutputConstraint ctx (OutputConstraint (Factory $ lp : lps) $ unitValue usCoin) && -- 2.
-    (unCoin lpCoinA /= unCoin lpCoinB)                                                                  && -- 3.
-    all (/= lp) lps                                                                                     && -- 4.
-    isUnity minted c                                                                                    && -- 5.
-    (amountOf minted liquidityCoin' == liquidity)                                                       && -- 6.
-    (outA > 0)                                                                                          && -- 7.
-    (outB > 0)                                                                                          && -- 8.
-    Constraints.checkOwnOutputConstraint ctx (OutputConstraint (Pool lp liquidity) $                       -- 9.
-        valueOf lpCoinA outA <> valueOf lpCoinB outB <> unitValue c)
+    traceIfFalse "validateCreate: Factory hash mismatch" (Constraints.weakCheckOwnOutputConstraint ctx (OutputConstraint (Factory $ lp : lps) $ unitValue usCoin)) && -- 2.
+    traceIfFalse "validateCreate:  cannot be the same coin" (unCoin lpCoinA /= unCoin lpCoinB)            && -- 3.
+    traceIfFalse "validateCreate:  duplicate pools found" (all (/= lp) lps)                             && -- 4.
+    traceIfFalse "validateCreate: not unity" (isUnity minted c)                                           && -- 5.
+    traceIfFalse "validateCreate: minted liquidity does not equate" (amountOf minted liquidityCoin' == liquidity) && -- 6.
+    traceIfFalse "validateCreate: outA not greater than 0" (outA > 0)                                   && -- 7.
+    traceIfFalse "validateCreate: outA not greater than 0" (outB > 0)                                   && -- 8.
+    traceIfFalse "validateCreate: Pool Datum hash mismatch" (Constraints.weakCheckOwnOutputConstraint ctx (OutputConstraint (Pool lp liquidity) $                       -- 9.
+        valueOf lpCoinA outA <> valueOf lpCoinB outB <> unitValue c))
   where
     poolOutput :: TxOut
     poolOutput = case [o | o <- getContinuingOutputs ctx, isUnity (txOutValue o) c] of
@@ -135,7 +135,7 @@ validateCloseFactory Uniswap{..} c lps ctx =
     traceIfFalse "Uniswap coin not present" (isUnity (valueWithin $ findOwnInput' ctx) usCoin)                          && -- 1.
     traceIfFalse "wrong mint value"        (txInfoMint info == negate (unitValue c <>  valueOf lC (snd lpLiquidity))) && -- 2.
     traceIfFalse "factory output wrong"                                                                                    -- 3.
-        (Constraints.checkOwnOutputConstraint ctx $ OutputConstraint (Factory $ filter (/= fst lpLiquidity) lps) $ unitValue usCoin)
+        (Constraints.weakCheckOwnOutputConstraint ctx $ OutputConstraint (Factory $ filter (/= fst lpLiquidity) lps) $ unitValue usCoin)
   where
     info :: TxInfo
     info = scriptContextTxInfo ctx
@@ -216,7 +216,7 @@ validateAdd c lp liquidity ctx =
     traceIfFalse "pool stake token missing from input"          (isUnity inVal c)                                                    &&
     traceIfFalse "output pool for same liquidity pair expected" (lp == fst outDatum)                                                 &&
     traceIfFalse "must not remove tokens"                       (delA >= 0 && delB >= 0)                                             &&
-    traceIfFalse "insufficient liquidity"                       (delL >= 0)                                                          &&
+    traceIfFalse "validateAdd: insufficient liquidity"                       (delL >= 0)                                                          &&
     traceIfFalse "wrong amount of liquidity tokens"             (delL == calculateAdditionalLiquidity oldA oldB liquidity delA delB) &&
     traceIfFalse "wrong amount of liquidity tokens minted"      (txInfoMint info == valueOf lC delL)
   where

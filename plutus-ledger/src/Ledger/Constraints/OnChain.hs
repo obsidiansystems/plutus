@@ -45,6 +45,19 @@ checkOwnOutputConstraint ctx@ScriptContext{scriptContextTxInfo} OutputConstraint
     in traceIfFalse "L1" -- "Output constraint"
     $ any checkOutput (V.getContinuingOutputs ctx)
 
+{-# INLINABLE weakCheckOwnOutputConstraint #-}
+weakCheckOwnOutputConstraint
+    :: ToData o
+    => ScriptContext
+    -> OutputConstraint o
+    -> Bool
+weakCheckOwnOutputConstraint ctx@ScriptContext{scriptContextTxInfo} OutputConstraint{ocDatum, ocValue} =
+    let hsh = V.findDatumHash (Datum $ toBuiltinData ocDatum) scriptContextTxInfo
+        checkOutput TxOut{txOutValue, txOutDatumHash=Just svh} = hsh == Just svh
+        checkOutput _                                          = False
+    in traceIfFalse "L1" -- "Output constraint"
+    $ any checkOutput (V.getContinuingOutputs ctx)
+
 {-# INLINABLE checkTxConstraint #-}
 checkTxConstraint :: ScriptContext -> TxConstraint -> Bool
 checkTxConstraint ctx@ScriptContext{scriptContextTxInfo} = \case
