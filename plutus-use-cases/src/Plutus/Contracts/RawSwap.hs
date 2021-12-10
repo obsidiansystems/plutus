@@ -12,8 +12,11 @@ import qualified Data.ByteString                   as BS
 import qualified Data.ByteString.Base16            as B16
 import qualified Data.ByteString.Lazy              as BSL
 import           Data.Maybe
+import           Data.Text                         (Text)
 import qualified Data.Text                         as T
 import qualified Data.Text.Encoding                as T
+import           Data.Time.Clock
+import           Data.Time.Clock.POSIX
 import           GHC.Generics
 import           Ledger
 import           Ledger.Scripts
@@ -28,8 +31,9 @@ import           System.Directory
 import           System.Process
 
 data RecentPoolBalance = RecentPoolBalance
-  { pcA :: Integer
-  , pcB :: Integer
+  { pcA   :: Integer
+  , pcB   :: Integer
+  , stamp :: Text
   } deriving (Show, Generic)
 
 instance FromJSON RecentPoolBalance
@@ -47,8 +51,9 @@ main
   -> FilePath  -- path to cardano-node node.socket
   -> String    -- uniswap smart contract address
   -> String    -- testnet magic number
+  -> FilePath  -- path for swap proposals (meaning they have been built, but not yet sent onchain)
   -> IO ()
-main coinACurrencySymbol tokenNameA amountA coinBCurrencySymbol tokenNameB amountB poolStateDatumHash cardanoCliExe cardanoNodeSocket addr magic = do
+main coinACurrencySymbol tokenNameA amountA coinBCurrencySymbol tokenNameB amountB poolStateDatumHash cardanoCliExe cardanoNodeSocket addr magic proposalPath = do
   let coinA = mkCoin coinACurrencySymbol tokenNameA
       coinB = mkCoin coinBCurrencySymbol tokenNameB
       swapParams = SwapParams {
@@ -147,21 +152,25 @@ main coinACurrencySymbol tokenNameA amountA coinBCurrencySymbol tokenNameB amoun
                         print $ "New liquidity balance for " ++ (show tokenNameA) ++ ": " ++ (show newA)
                         print $ "New liquidity balance for " ++ (show tokenNameB) ++ ": " ++ (show newB)
 
-                        createDirectoryIfMissing False "./rawSwap"
+                        createDirectoryIfMissing False proposalPath
 
-                        let redeemerUniswapAction :: UniswapAction
+                        currentTime <- getCurrentTime
+
+                        let posixStamp = utcTimeToPOSIXSeconds currentTime -- using posix stamp to mark files
+                            redeemerUniswapAction :: UniswapAction
                             redeemerUniswapAction = Swap
-                        let redeemerPlutusData = serialise $ builtinDataToData $ toBuiltinData redeemerUniswapAction
+                            redeemerPlutusData = serialise $ builtinDataToData $ toBuiltinData redeemerUniswapAction
                             redeemerCoder = fromPlutusData $ builtinDataToData $ toBuiltinData redeemerUniswapAction
                             redeemerJson = scriptDataToJson ScriptDataJsonDetailedSchema redeemerCoder
-                            recentPoolBalance = RecentPoolBalance (unAmount newA) (unAmount newB)
+                            recentPoolBalance = RecentPoolBalance (unAmount newA) (unAmount newB) (T.pack $ show posixStamp)
                         print $ "redeemerCoder " ++ (show redeemerCoder)
-                        BSL.writeFile "./rawSwap/rawSwap-redeemer-test" $ BSL.fromStrict $ B16.encode $ BSL.toStrict redeemerPlutusData
-                        BSL.writeFile "./rawSwap/rawSwap-redeemer" $ Aeson.encode redeemerJson
-                        BSL.writeFile "./rawSwap/recentPoolBalance.json" $ Aeson.encode recentPoolBalance
+                        BSL.writeFile (proposalPath <> "/" <> (show posixStamp) <> "-rawSwap-redeemer-test") $ BSL.fromStrict $ B16.encode $ BSL.toStrict redeemerPlutusData
+                        BSL.writeFile (proposalPath <> "/" <> (show posixStamp) <> "-rawSwap-redeemer") $ Aeson.encode redeemerJson
+                        -- TODO: This way of getting a recentPoolBalance is going to get obsolete fast
+                        BSL.writeFile (proposalPath <> "/recentPoolBalance.json") $ Aeson.encode recentPoolBalance
 
                         let poolScriptDataFromDatum = fromPlutusData $ builtinDataToData $ toBuiltinData uniswapDatum
                             poolScriptDataJson = scriptDataToJson ScriptDataJsonDetailedSchema poolScriptDataFromDatum
-                        BSL.writeFile "./rawSwap/poolDatum.plutus" $ Aeson.encode poolScriptDataJson
+                        BSL.writeFile (proposalPath <> "/" <> (show posixStamp) <> "-poolDatum.plutus") $ Aeson.encode poolScriptDataJson
                         return ()
               return ()

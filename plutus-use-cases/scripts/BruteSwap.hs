@@ -15,12 +15,12 @@ import           PlutusTx.Builtins.Internal
 
 main :: IO ()
 main = do
-  coinACurrencySymbol:tokenNameA:amountA:coinBCurrencySymbol:tokenNameB:amountB:poolStateDatumHash:cardanoCliExe:cardanoNodeSocket:uniswapAddress:testnetMagic:_ <- getArgs
+  coinACurrencySymbol:tokenNameA:amountA:coinBCurrencySymbol:tokenNameB:amountB:poolStateDatumHash:cardanoCliExe:cardanoNodeSocket:uniswapAddress:testnetMagic:proposalPath:_ <- getArgs
   let coinACurrencySymbol' :: CurrencySymbol = CurrencySymbol $ BuiltinByteString $ T.encodeUtf8 $ T.pack coinACurrencySymbol
       coinBCurrencySymbol' :: CurrencySymbol = CurrencySymbol $ BuiltinByteString $ T.encodeUtf8 $ T.pack coinBCurrencySymbol
       tokenNameA' :: TokenName = TokenName $ BuiltinByteString $ T.encodeUtf8 $ T.pack tokenNameA
       tokenNameB' :: TokenName = TokenName $ BuiltinByteString $ T.encodeUtf8 $ T.pack tokenNameB
       amountA' :: Integer = either (\_ -> 0) Prelude.fst $ T.decimal $ T.pack amountA
       amountB' :: Integer = either (\_ -> 0) Prelude.fst $ T.decimal $ T.pack amountB
-  PCR.main coinACurrencySymbol' tokenNameA' amountA' coinBCurrencySymbol' tokenNameB' amountB' poolStateDatumHash cardanoCliExe cardanoNodeSocket uniswapAddress testnetMagic
+  PCR.main coinACurrencySymbol' tokenNameA' amountA' coinBCurrencySymbol' tokenNameB' amountB' poolStateDatumHash cardanoCliExe cardanoNodeSocket uniswapAddress testnetMagic proposalPath
 
